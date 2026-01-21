@@ -1,11 +1,12 @@
-const CACHE_NAME = 'threejs-pwa-v1';
+const CACHE_NAME = 'threejs-pwa-v2';
 const urlsToCache = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json',
-  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+  'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js'
 ];
 
 // Install service worker and cache resources

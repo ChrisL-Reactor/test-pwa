@@ -1,5 +1,5 @@
 // Initialize Three.js scene
-let scene, camera, renderer, cube, torus, light;
+let scene, camera, renderer, cube, torus, light, controls;
 
 function init() {
     // Create scene
@@ -28,6 +28,19 @@ function init() {
     light = new THREE.PointLight(0xffffff, 1, 100);
     light.position.set(10, 10, 10);
     scene.add(light);
+
+    // Add grid helper
+    const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+    scene.add(gridHelper);
+
+    // Add OrbitControls for camera interaction
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 3;
+    controls.maxDistance = 50;
+    controls.maxPolarAngle = Math.PI / 2;
 
     // Create cube
     const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -60,6 +73,9 @@ function init() {
 
 function animate() {
     requestAnimationFrame(animate);
+
+    // Update controls
+    controls.update();
 
     // Rotate objects
     cube.rotation.x += 0.01;
