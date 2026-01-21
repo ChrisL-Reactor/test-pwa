@@ -179,7 +179,7 @@ function animate() {
 
     // Spin the wheels
     carWheels.forEach(wheel => {
-        wheel.rotation.x += 0.05;
+        wheel.rotation.z += 0.05;
     });
 
     // Animate light position
