@@ -36,66 +36,6 @@ body {
     opacity: 0.9;
 }
 
-#info small {
-    display: block;
-    margin-top: 8px;
-    font-size: 0.75rem;
-    opacity: 0.7;
-}
-
-#update-notification {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.95);
-    color: #333;
-    padding: 15px 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
-    text-align: center;
-    backdrop-filter: blur(10px);
-    animation: slideUp 0.3s ease-out;
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateX(-50%) translateY(100px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-    }
-}
-
-#update-notification p {
-    margin: 0 0 10px 0;
-    font-weight: 600;
-    color: #333;
-}
-
-#reload-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-#reload-button:hover {
-    transform: scale(1.05);
-}
-
-#reload-button:active {
-    transform: scale(0.95);
-}
-
 #canvas-container {
     width: 100vw;
     height: 100vh;
