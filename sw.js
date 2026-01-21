@@ -1,4 +1,4 @@
-const CACHE_NAME = 'threejs-pwa-v2';
+const CACHE_NAME = 'threejs-pwa-v2.1';
 const urlsToCache = [
   './',
   './index.html',
@@ -9,6 +9,13 @@ const urlsToCache = [
   'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js'
 ];
 
+// Listen for SKIP_WAITING message
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // Install service worker and cache resources
 self.addEventListener('install', event => {
   console.log('Service Worker: Installing...');
@@ -18,7 +25,6 @@ self.addEventListener('install', event => {
         console.log('Service Worker: Caching files');
         return cache.addAll(urlsToCache);
       })
-      .then(() => self.skipWaiting())
   );
 });
 

@@ -20,6 +20,13 @@
     <div id="info">
         <h1>Three.js PWA</h1>
         <p>A simple Progressive Web App with an interactive 3D scene</p>
+        <small id="version">v2.0 - Grid & Controls</small>
+    </div>
+
+    <!-- Update notification -->
+    <div id="update-notification" style="display: none;">
+        <p>New version available!</p>
+        <button id="reload-button">Update Now</button>
     </div>
 
     <div id="canvas-container"></div>
@@ -35,15 +42,51 @@
 
     <!-- Service Worker Registration -->
     <script>
+        let newWorker;
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => {
                         console.log('Service Worker registered successfully:', registration.scope);
+
+                        // Check for updates every 60 seconds
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000);
+
+                        // Detect when new service worker is waiting
+                        registration.addEventListener('updatefound', () => {
+                            newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available, show update notification
+                                    const notification = document.getElementById('update-notification');
+                                    notification.style.display = 'block';
+                                    console.log('New version available! Click to update.');
+                                }
+                            });
+                        });
                     })
                     .catch(error => {
                         console.log('Service Worker registration failed:', error);
                     });
+
+                // Handle reload button click
+                document.getElementById('reload-button').addEventListener('click', () => {
+                    if (newWorker) {
+                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                    window.location.reload();
+                });
+
+                // Auto reload when new service worker takes control
+                let refreshing;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (refreshing) return;
+                    refreshing = true;
+                    window.location.reload();
+                });
             });
         }
     </script>
