@@ -13,6 +13,46 @@
     <div id="info">
         <h1>Three.js Scene</h1>
         <p>An interactive 3D scene with camera controls</p>
+        <small>Click on an object to select it</small>
+    </div>
+
+    <!-- Transform controls panel -->
+    <div id="controls-panel" style="display: none;">
+        <h3 id="selected-object-name">Selected: None</h3>
+
+        <div class="control-section">
+            <h4>Translate</h4>
+            <div class="button-group">
+                <button class="control-btn" data-action="translate" data-axis="x" data-dir="-1">X-</button>
+                <button class="control-btn" data-action="translate" data-axis="x" data-dir="1">X+</button>
+                <button class="control-btn" data-action="translate" data-axis="y" data-dir="-1">Y-</button>
+                <button class="control-btn" data-action="translate" data-axis="y" data-dir="1">Y+</button>
+                <button class="control-btn" data-action="translate" data-axis="z" data-dir="-1">Z-</button>
+                <button class="control-btn" data-action="translate" data-axis="z" data-dir="1">Z+</button>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <h4>Rotate</h4>
+            <div class="button-group">
+                <button class="control-btn" data-action="rotate" data-axis="x" data-dir="-1">X-</button>
+                <button class="control-btn" data-action="rotate" data-axis="x" data-dir="1">X+</button>
+                <button class="control-btn" data-action="rotate" data-axis="y" data-dir="-1">Y-</button>
+                <button class="control-btn" data-action="rotate" data-axis="y" data-dir="1">Y+</button>
+                <button class="control-btn" data-action="rotate" data-axis="z" data-dir="-1">Z-</button>
+                <button class="control-btn" data-action="rotate" data-axis="z" data-dir="1">Z+</button>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <h4>Scale</h4>
+            <div class="button-group">
+                <button class="control-btn" data-action="scale" data-dir="-1">Smaller</button>
+                <button class="control-btn" data-action="scale" data-dir="1">Larger</button>
+            </div>
+        </div>
+
+        <button id="deselect-btn" class="deselect-btn">Deselect</button>
     </div>
 
     <div id="canvas-container"></div>
