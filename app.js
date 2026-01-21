@@ -86,6 +86,9 @@ function init() {
     // Handle click events for object selection
     renderer.domElement.addEventListener('click', onObjectClick, false);
 
+    // Handle touch events for mobile object selection
+    renderer.domElement.addEventListener('touchend', onObjectTouch, false);
+
     // Setup transform controls
     setupTransformControls();
 
@@ -128,6 +131,32 @@ function onObjectClick(event) {
     const rect = renderer.domElement.getBoundingClientRect();
     mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    // Update raycaster
+    raycaster.setFromCamera(mouse, camera);
+
+    // Check for intersections
+    const intersects = raycaster.intersectObjects(selectableObjects);
+
+    if (intersects.length > 0) {
+        const object = intersects[0].object;
+        selectObject(object);
+    } else {
+        deselectObject();
+    }
+}
+
+// Touch selection for mobile devices
+function onObjectTouch(event) {
+    // Only handle single-finger taps (not pinch/zoom gestures)
+    if (event.changedTouches.length !== 1) return;
+
+    const touch = event.changedTouches[0];
+    const rect = renderer.domElement.getBoundingClientRect();
+
+    // Calculate touch position in normalized device coordinates
+    mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
 
     // Update raycaster
     raycaster.setFromCamera(mouse, camera);
