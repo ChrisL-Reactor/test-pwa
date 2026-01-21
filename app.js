@@ -1,8 +1,8 @@
 // Initialize Three.js scene
-let scene, camera, renderer, cube, torus, light, controls;
+let scene, camera, renderer, car, light, controls;
 let raycaster, mouse, selectableObjects, selectedObject;
 let originalMaterials = new Map();
-let autoRotateObjects = true;
+let carWheels = [];
 
 function init() {
     // Create scene
@@ -16,7 +16,7 @@ function init() {
         0.1,
         1000
     );
-    camera.position.z = 5;
+    camera.position.set(3, 2, 4);
 
     // Create renderer
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -49,36 +49,21 @@ function init() {
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
-    // Create cube
-    const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-    const cubeMaterial = new THREE.MeshStandardMaterial({
-        color: 0x667eea,
-        metalness: 0.5,
-        roughness: 0.5
+    // Create car
+    car = createCar();
+    car.position.y = 0.4;
+    car.name = 'Car';
+    scene.add(car);
+
+    // Store selectable objects (use car's children for raycasting)
+    selectableObjects = [];
+    car.traverse((child) => {
+        if (child.isMesh) {
+            selectableObjects.push(child);
+            // Store original material
+            originalMaterials.set(child, child.material.clone());
+        }
     });
-    cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-    cube.position.x = -2;
-    cube.name = 'Cube';
-    scene.add(cube);
-
-    // Create torus
-    const torusGeometry = new THREE.TorusGeometry(0.7, 0.3, 16, 100);
-    const torusMaterial = new THREE.MeshStandardMaterial({
-        color: 0x764ba2,
-        metalness: 0.7,
-        roughness: 0.3
-    });
-    torus = new THREE.Mesh(torusGeometry, torusMaterial);
-    torus.position.x = 2;
-    torus.name = 'Torus';
-    scene.add(torus);
-
-    // Store selectable objects
-    selectableObjects = [cube, torus];
-
-    // Store original materials for highlighting
-    originalMaterials.set(cube, cubeMaterial.clone());
-    originalMaterials.set(torus, torusMaterial.clone());
 
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
@@ -96,20 +81,106 @@ function init() {
     animate();
 }
 
+function createCar() {
+    const carGroup = new THREE.Group();
+
+    // Car body (main chassis)
+    const bodyGeometry = new THREE.BoxGeometry(2, 0.5, 1);
+    const bodyMaterial = new THREE.MeshStandardMaterial({
+        color: 0xe63946,
+        metalness: 0.6,
+        roughness: 0.4
+    });
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.position.y = 0.25;
+    body.name = 'Car';
+    carGroup.add(body);
+
+    // Car cabin (roof)
+    const cabinGeometry = new THREE.BoxGeometry(1, 0.4, 0.9);
+    const cabinMaterial = new THREE.MeshStandardMaterial({
+        color: 0x457b9d,
+        metalness: 0.3,
+        roughness: 0.5
+    });
+    const cabin = new THREE.Mesh(cabinGeometry, cabinMaterial);
+    cabin.position.set(-0.1, 0.7, 0);
+    cabin.name = 'Car';
+    carGroup.add(cabin);
+
+    // Wheel material
+    const wheelMaterial = new THREE.MeshStandardMaterial({
+        color: 0x2d3436,
+        metalness: 0.2,
+        roughness: 0.8
+    });
+
+    // Create wheels
+    const wheelGeometry = new THREE.CylinderGeometry(0.25, 0.25, 0.2, 16);
+    const wheelPositions = [
+        { x: 0.6, y: 0, z: 0.5 },   // front right
+        { x: 0.6, y: 0, z: -0.5 },  // front left
+        { x: -0.6, y: 0, z: 0.5 },  // back right
+        { x: -0.6, y: 0, z: -0.5 }  // back left
+    ];
+
+    wheelPositions.forEach(pos => {
+        const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial.clone());
+        wheel.rotation.x = Math.PI / 2;
+        wheel.position.set(pos.x, pos.y, pos.z);
+        wheel.name = 'Car';
+        carGroup.add(wheel);
+        carWheels.push(wheel);
+    });
+
+    // Headlights
+    const headlightGeometry = new THREE.BoxGeometry(0.05, 0.15, 0.2);
+    const headlightMaterial = new THREE.MeshStandardMaterial({
+        color: 0xf1faee,
+        emissive: 0xffffcc,
+        emissiveIntensity: 0.5
+    });
+
+    const headlightLeft = new THREE.Mesh(headlightGeometry, headlightMaterial);
+    headlightLeft.position.set(1.01, 0.25, 0.3);
+    headlightLeft.name = 'Car';
+    carGroup.add(headlightLeft);
+
+    const headlightRight = new THREE.Mesh(headlightGeometry, headlightMaterial.clone());
+    headlightRight.position.set(1.01, 0.25, -0.3);
+    headlightRight.name = 'Car';
+    carGroup.add(headlightRight);
+
+    // Taillights
+    const taillightMaterial = new THREE.MeshStandardMaterial({
+        color: 0xff0000,
+        emissive: 0xff0000,
+        emissiveIntensity: 0.3
+    });
+
+    const taillightLeft = new THREE.Mesh(headlightGeometry, taillightMaterial);
+    taillightLeft.position.set(-1.01, 0.25, 0.3);
+    taillightLeft.name = 'Car';
+    carGroup.add(taillightLeft);
+
+    const taillightRight = new THREE.Mesh(headlightGeometry, taillightMaterial.clone());
+    taillightRight.position.set(-1.01, 0.25, -0.3);
+    taillightRight.name = 'Car';
+    carGroup.add(taillightRight);
+
+    return carGroup;
+}
+
 function animate() {
     requestAnimationFrame(animate);
 
     // Update controls
     controls.update();
 
-    // Rotate objects only if auto-rotate is enabled
-    if (autoRotateObjects) {
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.01;
-
-        torus.rotation.x += 0.01;
-        torus.rotation.y += 0.02;
-    }
+    // Spin the wheels
+    carWheels.forEach(wheel => {
+        wheel.rotation.x += 0.05;
+    });
 
     // Animate light position
     const time = Date.now() * 0.001;
@@ -172,16 +243,17 @@ function onObjectTouch(event) {
     }
 }
 
-// Select an object
+// Select an object (selects the whole car)
 function selectObject(object) {
     // Deselect current object first
     if (selectedObject) {
         deselectObject();
     }
 
-    selectedObject = object;
+    // Always select the car group
+    selectedObject = car;
 
-    // Highlight the selected object
+    // Highlight all parts of the car
     const highlightMaterial = new THREE.MeshStandardMaterial({
         color: 0xffff00,
         metalness: 0.5,
@@ -189,10 +261,12 @@ function selectObject(object) {
         emissive: 0xffff00,
         emissiveIntensity: 0.3
     });
-    selectedObject.material = highlightMaterial;
 
-    // Stop auto-rotation for the selected object
-    autoRotateObjects = false;
+    car.traverse((child) => {
+        if (child.isMesh) {
+            child.material = highlightMaterial.clone();
+        }
+    });
 
     // Show controls panel
     const controlsPanel = document.getElementById('controls-panel');
@@ -205,14 +279,17 @@ function selectObject(object) {
 // Deselect current object
 function deselectObject() {
     if (selectedObject) {
-        // Restore original material
-        const originalMaterial = originalMaterials.get(selectedObject);
-        if (originalMaterial) {
-            selectedObject.material = originalMaterial.clone();
-        }
+        // Restore original materials for all car parts
+        car.traverse((child) => {
+            if (child.isMesh) {
+                const originalMaterial = originalMaterials.get(child);
+                if (originalMaterial) {
+                    child.material = originalMaterial.clone();
+                }
+            }
+        });
 
         selectedObject = null;
-        autoRotateObjects = true;
 
         // Hide controls panel
         const controlsPanel = document.getElementById('controls-panel');
